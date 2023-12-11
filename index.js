@@ -7,7 +7,8 @@ import qrCodeHistoryRoutes from "./app/routes/qrCodeHistoryRoutes.js";
 config();
 const app = express();
 const port = 3000; // Choose the port number you prefer
-const db_connection_string = process.env.MONGODB_URI;
+// const db_connection_string = process.env.MONGODB_URI;
+const db_connection_string = process.env.DATABASE_URL;
 
 // Middleware
 app.use(cors());
