@@ -2,7 +2,7 @@ import { config } from "dotenv";
 import express from "express";
 import cors from "cors";
 import { connect } from "./config/database.js"; // Import
-
+// import { getConnectionInfo } from "./config/connection";
 import qrCodeHistoryRoutes from "./app/routes/qrCodeHistoryRoutes.js";
 config();
 const app = express();
@@ -18,7 +18,8 @@ app.get("/api", async (_, res) => {
 });
 
 // Start the server
-app.listen(port, () => {
+app.listen(port, async () => {
+  // var connectionInfo = await getConnectionInfo();
   connect(db_connection_string);
   console.log(`Server running on port ${port}`);
 });
