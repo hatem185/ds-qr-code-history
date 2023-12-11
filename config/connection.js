@@ -26,7 +26,7 @@ async function getConnectionInfo() {
   }
 
   // To override the database name, set the DATABASE_NAME environment variable in the .env file
-  const DATABASE_NAME = process.env.DATABASE_NAME || "ds-system-database";
+  const DATABASE_NAME = process.env.DATABASE_NAME || "dssystem-database";
 
   return {
     DATABASE_URL: process.env.DATABASE_URL,
