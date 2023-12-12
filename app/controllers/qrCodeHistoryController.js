@@ -91,7 +91,7 @@ async function getLatestCode(_ = new Request(), res = new Response()) {
 }
 async function checkRangeInHistory(req = new Request(), res = new Response()) {
   const { serial_number, qty_codes } = req.query;
-  console.log(`${serial_number}, ${qty_codes}`);
+  console.log(`CheckRangeInHistory: ${serial_number}, ${qty_codes}`);
   const lastCode = serial_number + (qty_codes - 1);
   const resultChecking = await checkSerialNumberOverlap(
     serial_number,
