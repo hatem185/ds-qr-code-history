@@ -1,5 +1,5 @@
 import { config } from "dotenv";
-import { getSecret } from "./keyvault";
+import { getSecret } from "./keyvault.js";
 config();
 async function putKeyVaultSecretInEnvVar() {
   const secretName = process.env.KEY_VAULT_SECRET_NAME_DATABASE_URL;

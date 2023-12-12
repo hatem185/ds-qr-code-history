@@ -2,7 +2,7 @@ import { config } from "dotenv";
 import express from "express";
 import cors from "cors";
 import { connect } from "./config/database.js"; // Import
-import { getConnectionInfo } from "./config/connection";
+import { getConnectionInfo } from "./config/connection.js";
 import qrCodeHistoryRoutes from "./app/routes/qrCodeHistoryRoutes.js";
 config();
 const app = express();
@@ -20,9 +20,8 @@ app.get("/api", async (_, res) => {
 // Start the server
 app.listen(port, async () => {
   let db_connection_string = "";
-
   if (ENVITONMENT === "development") {
-    db_connection_string = process.env.DATABASE_URL;
+    db_connection_string = process.env.LOCAL_DATABASE_URL;
   } else {
     db_connection_string = (await getConnectionInfo()).DATABASE_URL;
   }
