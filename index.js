@@ -19,13 +19,13 @@ app.get("/api", async (_, res) => {
 
 // Start the server
 app.listen(port, async () => {
-  let db_connection_string = "";
-  if (ENVITONMENT === "development") {
-    db_connection_string = process.env.LOCAL_DATABASE_URL;
-  } else {
-    db_connection_string = (await getConnectionInfo()).DATABASE_URL;
-  }
-  connect(db_connection_string);
+  let { RENDER_DATABASE_URL } = process.env;
+  // if (ENVITONMENT === "development") {
+  //   db_connection_string = process.env.LOCAL_DATABASE_URL;
+  // } else {
+  //   db_connection_string = (await getConnectionInfo()).DATABASE_URL;
+  // }
+  connect(RENDER_DATABASE_URL);
 
   console.log(`Server running on port ${port}`);
 });
