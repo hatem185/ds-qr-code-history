@@ -49,7 +49,7 @@ async function addNewQRCodeHistory(req = new Request(), res = new Response()) {
       number_of_pages: numberOfPages,
     });
     const result = await qrCodeHistory.save();
-    res.json({
+    res.status(201).json({
       message: "QR code history added successfully",
       data: result.toJSON(),
     });
