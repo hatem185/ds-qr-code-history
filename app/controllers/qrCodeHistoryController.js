@@ -1,10 +1,10 @@
 import QRCodeHistory from "../models/qrCodeHistory.js";
 import { calcNumberOfPages } from "../utils/helper.js";
-
+const limitNumberOfPages = 16;
 async function fetchQRCodeHistories(req = new Request(), res = new Response()) {
-  const limit = req.query.limit || 15;
-  const page = req.query.page || 1;
-  const skip = (page - 1) * limit;
+  const { limit, page } = req.query;
+  const skip = ((+page || 1) - 1) * (+limit || limitNumberOfPages);
+  console.log(`limit: ${limit}, skip: ${skip}`);
   try {
     const qrCodeHistories = await QRCodeHistory.find(
       {},
@@ -17,7 +17,11 @@ async function fetchQRCodeHistories(req = new Request(), res = new Response()) {
         limit: limit,
       }
     );
-    res.json({ qrCodeHistories });
+    return res.status(200).json({
+      page: +page,
+      fetchedLength: qrCodeHistories.length,
+      data: qrCodeHistories,
+    });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Error fetching QR code histories" });
