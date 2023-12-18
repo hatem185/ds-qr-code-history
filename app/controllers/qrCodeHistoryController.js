@@ -29,7 +29,7 @@ async function fetchQRCodeHistories(req = new Request(), res = new Response()) {
 }
 async function addNewQRCodeHistory(req = new Request(), res = new Response()) {
   const codesPerPage = +req.query.codesPerPage || 6;
-  const { serial_number, qty_codes, printed_pages_number } = req.body;
+  const { serial_number, qty_codes, printed_pages_number, type } = req.body;
   const lastCode = serial_number + (qty_codes - 1);
   const resultChecking = await checkSerialNumberOverlap(
     serial_number,
@@ -51,6 +51,7 @@ async function addNewQRCodeHistory(req = new Request(), res = new Response()) {
       codes_per_page: codesPerPage,
       printed_pages_number: printed_pages_number,
       number_of_pages: numberOfPages,
+      type: type,
     });
     const result = await qrCodeHistory.save();
     res.status(201).json({

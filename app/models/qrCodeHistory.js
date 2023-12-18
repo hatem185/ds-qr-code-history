@@ -27,6 +27,10 @@ const qrCodeHistorySchema = new mongoose.Schema({
     type: Date,
     default: Date.now,
   },
+  type: {
+    type: String,
+    required: true,
+  },
 });
 const QRCodeHistory = mongoose.model("QRCodeHistory", qrCodeHistorySchema);
 export default QRCodeHistory;
