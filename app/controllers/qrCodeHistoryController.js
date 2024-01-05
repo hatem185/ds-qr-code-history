@@ -1,13 +1,14 @@
+import type from "mongoose/lib/schema/operators/type.js";
 import QRCodeHistory from "../models/qrCodeHistory.js";
 import { calcNumberOfPages } from "../utils/helper.js";
 const limitNumberOfPages = 16;
 async function fetchQRCodeHistories(req = new Request(), res = new Response()) {
-  const { limit, page } = req.query;
+  const { limit, page, type } = req.query;
   const skip = ((+page || 1) - 1) * (+limit || limitNumberOfPages);
   console.log(`limit: ${limit}, skip: ${skip}`);
   try {
     const qrCodeHistories = await QRCodeHistory.find(
-      {},
+      type ? { type } : {},
       {},
       {
         sort: {
@@ -28,12 +29,31 @@ async function fetchQRCodeHistories(req = new Request(), res = new Response()) {
   }
 }
 async function addNewQRCodeHistory(req = new Request(), res = new Response()) {
-  const codesPerPage = +req.query.codesPerPage || 6;
-  const { serial_number, qty_codes, printed_pages_number, type } = req.body;
+  let codesPerPage = 0;
+  const {
+    serial_number,
+    qty_codes,
+    printed_pages_number,
+    type,
+    prefix,
+    suffix,
+  } = req.body;
+  if (typeof type != "string") {
+    return res.json({
+      message: "enter valid QR code type.",
+      data: {},
+    });
+  }
+  if (type.toString().toLowerCase() === "box") {
+    codesPerPage = 1;
+  } else {
+    codesPerPage = +req.query.codesPerPage || 6;
+  }
   const lastCode = serial_number + (qty_codes - 1);
   const resultChecking = await checkSerialNumberOverlap(
     serial_number,
-    lastCode
+    lastCode,
+    type
   );
   if (resultChecking.exists !== "not_exists") {
     return res.json({
@@ -52,6 +72,8 @@ async function addNewQRCodeHistory(req = new Request(), res = new Response()) {
       printed_pages_number: printed_pages_number,
       number_of_pages: numberOfPages,
       type: type,
+      prefix: prefix,
+      suffix: suffix,
     });
     const result = await qrCodeHistory.save();
     res.status(201).json({
@@ -63,10 +85,12 @@ async function addNewQRCodeHistory(req = new Request(), res = new Response()) {
     res.status(500).json({ message: "Error adding QR code history" });
   }
 }
-async function getLatestCode(_ = new Request(), res = new Response()) {
+async function getLatestCode(req = new Request(), res = new Response()) {
+  const { type } = req.query;
+  console.log(`type: ${type}`);
   try {
     const latestCodeDocument = await QRCodeHistory.findOne(
-      {},
+      { type: type },
       {},
       { sort: { last_code: -1 } }
     );
@@ -95,35 +119,44 @@ async function getLatestCode(_ = new Request(), res = new Response()) {
   }
 }
 async function checkRangeInHistory(req = new Request(), res = new Response()) {
-  const { serial_number, qty_codes } = req.query;
+  const { serial_number, qty_codes, type } = req.query;
   const lastCode = +serial_number + +(qty_codes - 1);
-  console.log(`CheckRangeInHistory: ${serial_number}, ${lastCode}`);
+  console.log(type);
 
+  console.log(`CheckRangeInHistory: ${serial_number}, ${lastCode}`);
   const resultChecking = await checkSerialNumberOverlap(
     serial_number,
-    lastCode
+    lastCode,
+    type
   );
   return res.json(resultChecking);
 }
-async function checkSerialNumberOverlap(serialNumber, lastCode) {
+async function checkSerialNumberOverlap(serialNumber, lastCode, type) {
   const overlapQuery = {
-    $or: [
+    $and: [
       {
-        $and: [
-          //first_code >= serialNumber && last_code <= lastCode
-          { first_code: { $gte: serialNumber } },
-          { last_code: { $lte: lastCode } },
-        ],
+        type: { $eq: type },
       },
       {
         $or: [
           {
-            //first_code <= serialNumber && last_code >= serialNumber
-            first_code: { $lte: serialNumber },
-            last_code: { $gte: serialNumber },
+            $and: [
+              //first_code >= serialNumber && last_code <= lastCode
+              { first_code: { $gte: serialNumber } },
+              { last_code: { $lte: lastCode } },
+            ],
           },
-          //first_code <= lastCode && last_code >= lastCode
-          { first_code: { $lte: lastCode }, last_code: { $gte: lastCode } },
+          {
+            $or: [
+              {
+                //first_code <= serialNumber && last_code >= serialNumber
+                first_code: { $lte: serialNumber },
+                last_code: { $gte: serialNumber },
+              },
+              //first_code <= lastCode && last_code >= lastCode
+              { first_code: { $lte: lastCode }, last_code: { $gte: lastCode } },
+            ],
+          },
         ],
       },
     ],
